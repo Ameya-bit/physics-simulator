@@ -8,8 +8,7 @@ import {
   NumberInput
 } from "@chakra-ui/react"
 
-export default function UIControls({ activeParams, setActiveParams, onLaunch }) {
-    console.log(activeParams);
+export default function UIControls({ activeParams, setActiveParams, onLaunch, reset }) {
   return (
     <div style={{ position: 'absolute', bottom: 20, left: 20, zIndex: 1000 }}>
       <VStack align="start" spacing={4} bg="whiteAlpha.800" p={4} borderRadius="md">
@@ -177,6 +176,13 @@ export default function UIControls({ activeParams, setActiveParams, onLaunch }) 
           width="100%"
         >
           Apply & Launch
+        </Button>
+        <Button 
+          onClick={() => reset(activeParams)} 
+          colorScheme="blue" 
+          width="100%"
+        >
+          Reset
         </Button>
       </VStack>
     </div>

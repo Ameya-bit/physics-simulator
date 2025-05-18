@@ -29,8 +29,11 @@ function CameraController({ boxRef }) {
   )
 }
 
-function DistanceMarkers() {
-  const markers = []
+function DistanceMarkers({ setShowDataPage }) {
+    if (setShowDataPage)
+         return null; 
+    else {
+        const markers = []
   for (let x = -500; x <= 500; x += 10) {
     markers.push(
       <group key={x}>
@@ -54,7 +57,8 @@ function DistanceMarkers() {
               borderRadius: 3,
               fontSize: 10,
               color: '#fff',
-              transform: 'translateX(-50%)'
+              transform: 'translateX(-50%)',
+              zIndex: 0
             }}>
               {Math.abs(x)}m
             </div>
@@ -64,6 +68,9 @@ function DistanceMarkers() {
     )
   }
   return <>{markers}</>
+    }
+    
+  
 }
 
 function BlockWithOverlay({ boxRef, params, setVelocity, setPosition }) {
@@ -73,7 +80,6 @@ function BlockWithOverlay({ boxRef, params, setVelocity, setPosition }) {
     if (boxRef.current) {
       const rigidBody = boxRef.current;
       const vel = rigidBody.linvel();
-      const angVel = rigidBody.angvel(); // Get ACTUAL angular velocity
       const pos = rigidBody.translation();
       
       // Update state
@@ -84,23 +90,25 @@ function BlockWithOverlay({ boxRef, params, setVelocity, setPosition }) {
       const speed = Math.sqrt(vel.x ** 2 + vel.y ** 2);
       const direction = new THREE.Vector3(vel.x, vel.y, 0).normalize();
 
-    //   // Air resistance (F_d = ½ρv²C_dA)
-      if (speed > 1) {
-        const dragForce = 0.5 * params.airDensity * params.drag * speed ** 2;
-        force.current.copy(direction).multiplyScalar(-dragForce);
-        rigidBody.resetForces(true);
-        rigidBody.addForce(force.current, true);
-      }
+    // AIR RESISTANCE (F = ma → a = F/m)
+    if (speed > 1) {
+      const dragForce = 0.5 * params.airDensity * params.drag * speed ** 2;
+      const dragAcceleration = dragForce / params.mass; // ← Critical fix
+      force.current.copy(direction).multiplyScalar(-dragAcceleration);
+      rigidBody.resetForces(true);
+      rigidBody.addForce(force.current, true);
+    }
 
-      // Magnus effect (F = ρ * (ω × v) * C * A)
-      if (Math.abs(params.spin) > 0.1 && speed > 0.1) {
-        const magnusForce = 0.0005 * params.airDensity * params.spin * speed
-        rigidBody.addForce({
-          x: -vel.y * magnusForce, // Curves right for positive spin
-          y: vel.x * magnusForce,  // Curves up/down depending on velocity
-          z: 0
-        }, true)
-      }
+    // MAGNUS EFFECT (F = ma → a = F/m)
+    if (Math.abs(params.spin) > 0.1 && speed > 0.1) {
+      const magnusForce = 0.0005 * params.airDensity * params.spin * speed;
+      const magnusAcceleration = magnusForce / params.mass; // ← Critical fix
+      rigidBody.addForce({
+        x: -vel.y * magnusAcceleration,
+        y: vel.x * magnusAcceleration,
+        z: 0
+      }, true);
+    }
 
       
     }
@@ -114,7 +122,7 @@ function BlockWithOverlay({ boxRef, params, setVelocity, setPosition }) {
   );
 }
 
-export default function PhysicsScene({ boxRef, setVelocity, setPosition, params }) {
+export default function PhysicsScene({ boxRef, setVelocity, setPosition, params, setShowDataPage }) {
   return (
     <Canvas camera={{ position: [30, 30, 30], fov: 45 }}>
       <ambientLight intensity={0.5} />
@@ -140,12 +148,12 @@ export default function PhysicsScene({ boxRef, setVelocity, setPosition, params 
         </RigidBody>
 
         <RigidBody type="fixed" position={[0, -1, 0]}>
-          <CuboidCollider args={[100, 0, 100]} restitution={params.restitution} />
+          <CuboidCollider args={[100, 1, 100]} restitution={params.restitution} />
           <mesh rotation={[-Math.PI/2, 0, 0]} position={[0, 0, 0]}>
             <planeGeometry args={[1000, 1000]} />
             <meshStandardMaterial color="#ddd" />
           </mesh>
-          <DistanceMarkers />
+          <DistanceMarkers setShowDataPage={setShowDataPage}/>
         </RigidBody>
         
       </Physics>
