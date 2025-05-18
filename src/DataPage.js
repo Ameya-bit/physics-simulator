@@ -14,11 +14,10 @@ import {
   Pagination,
   ButtonGroup,
   IconButton,
-  Select, 
-  
+  Select,
 } from "@chakra-ui/react";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
-import {DistanceMarkers, CameraController} from "./physicsscene";
+import { DistanceMarkers, CameraController } from "./physicsscene";
 import {
   LineChart,
   Line,
@@ -50,7 +49,8 @@ function calculateTheoreticalDistance(params) {
 }
 
 function downloadCSV(trials) {
-  const header = "Velocity,Angle,Spin,Distance,Max Height,Air Time,Theoretical Distance,Trajectory\n";
+  const header =
+    "Velocity,Angle,Spin,Distance,Max Height,Air Time,Theoretical Distance,Trajectory\n";
   const rows = trials.map((trial) => [
     trial.params.launchVelocity || 0,
     trial.params.angle || 0,
@@ -60,7 +60,7 @@ function downloadCSV(trials) {
     trial.results?.airTime ?? 0,
     calculateTheoreticalDistance(trial.params) ?? 0,
     // Serialize trajectory as a JSON string, and wrap in quotes for CSV safety
-    `"${JSON.stringify(trial.results?.trajectory ?? [])}"`
+    `"${JSON.stringify(trial.results?.trajectory ?? [])}"`,
   ]);
 
   const csv = header + rows.map((row) => row.join(",")).join("\n");
@@ -76,40 +76,43 @@ function handleCSVUpload(event, setTrials) {
   if (!file) return;
 
   Papa.parse(file, {
-  header: true,
-  skipEmptyLines: true,
-  complete: function(results) {
-    try {
-      const importedTrials = results.data.map((row, i) => {
-        const trajectory = JSON.parse(row.Trajectory || "[]");
-        
-        return {
-          id: `imported-${Date.now()}-${i}`,
-          params: {
-            launchVelocity: parseFloat(row.Velocity) || 0,
-            angle: parseFloat(row.Angle) || 0,
-            spin: parseFloat(row.Spin) || 0,
-          },
-          results: {
-            distance: parseFloat(row.Distance) || 0,
-            maxHeight: parseFloat(row["Max Height"]) || 0,
-            airTime: parseFloat(row["Air Time"]) || 0,
-            theoreticalDistance: parseFloat(row["Theoretical Distance"]) || 0,
-            trajectory,
-          }
-        };
-      }).filter(trial => !isNaN(trial.params.launchVelocity));
+    header: true,
+    skipEmptyLines: true,
+    complete: function (results) {
+      try {
+        const importedTrials = results.data
+          .map((row, i) => {
+            const trajectory = JSON.parse(row.Trajectory || "[]");
 
-      setTrials(prev => [...prev, ...importedTrials]);
-    } catch (error) {
-      console.error("Error parsing CSV file:", error);
-      alert(error.message); // Or your preferred error UI
-    }
-  }
-});
+            return {
+              id: `imported-${Date.now()}-${i}`,
+              params: {
+                launchVelocity: parseFloat(row.Velocity) || 0,
+                angle: parseFloat(row.Angle) || 0,
+                spin: parseFloat(row.Spin) || 0,
+              },
+              results: {
+                distance: parseFloat(row.Distance) || 0,
+                maxHeight: parseFloat(row["Max Height"]) || 0,
+                airTime: parseFloat(row["Air Time"]) || 0,
+                theoreticalDistance:
+                  parseFloat(row["Theoretical Distance"]) || 0,
+                trajectory,
+              },
+            };
+          })
+          .filter((trial) => !isNaN(trial.params.launchVelocity));
 
-// Reset file input so same file can be uploaded again if needed
-event.target.value = "";
+        setTrials((prev) => [...prev, ...importedTrials]);
+      } catch (error) {
+        console.error("Error parsing CSV file:", error);
+        alert(error.message); // Or your preferred error UI
+      }
+    },
+  });
+
+  // Reset file input so same file can be uploaded again if needed
+  event.target.value = "";
 }
 
 const paramCollection = createListCollection({
@@ -125,17 +128,19 @@ const paramCollection = createListCollection({
 
 function binTrials(trials, xParam, yParam, zParam, xBins = 10, yBins = 10) {
   // Get min/max for axis scaling
-  const xVals = trials.map(t => getNestedValue(t, xParam));
-  const yVals = trials.map(t => getNestedValue(t, yParam));
-  const xMin = Math.min(...xVals), xMax = Math.max(...xVals);
-  const yMin = Math.min(...yVals), yMax = Math.max(...yVals);
+  const xVals = trials.map((t) => getNestedValue(t, xParam));
+  const yVals = trials.map((t) => getNestedValue(t, yParam));
+  const xMin = Math.min(...xVals),
+    xMax = Math.max(...xVals);
+  const yMin = Math.min(...yVals),
+    yMax = Math.max(...yVals);
 
   // Bin data
   const bins = Array.from({ length: xBins }, () =>
     Array.from({ length: yBins }, () => [])
   );
 
-  trials.forEach(trial => {
+  trials.forEach((trial) => {
     const x = getNestedValue(trial, xParam);
     const y = getNestedValue(trial, yParam);
     const z = getNestedValue(trial, zParam);
@@ -170,39 +175,38 @@ function binTrials(trials, xParam, yParam, zParam, xBins = 10, yBins = 10) {
   return heatmapData;
 }
 
-
 const renderSelect = (label, value, onChange) => (
-    <Select.Root
-      collection={paramCollection}
-      value={[value]}
-      onValueChange={({ value }) => onChange(value[0])}
-      size="sm"
-      width="100%"
-    >
-      <Select.HiddenSelect />
-      <Select.Label>{label}</Select.Label>
-      <Select.Control>
-        <Select.Trigger>
-          <Select.ValueText placeholder={`Select ${label}`} />
-        </Select.Trigger>
-        <Select.IndicatorGroup>
-          <Select.Indicator />
-        </Select.IndicatorGroup>
-      </Select.Control>
-      <Portal>
-        <Select.Positioner>
-          <Select.Content>
-            {paramCollection.items.map((item) => (
-              <Select.Item item={item} key={item.value}>
-                {item.label}
-                <Select.ItemIndicator />
-              </Select.Item>
-            ))}
-          </Select.Content>
-        </Select.Positioner>
-      </Portal>
-    </Select.Root>
-  );
+  <Select.Root
+    collection={paramCollection}
+    value={[value]}
+    onValueChange={({ value }) => onChange(value[0])}
+    size="sm"
+    width="100%"
+  >
+    <Select.HiddenSelect />
+    <Select.Label>{label}</Select.Label>
+    <Select.Control>
+      <Select.Trigger>
+        <Select.ValueText placeholder={`Select ${label}`} />
+      </Select.Trigger>
+      <Select.IndicatorGroup>
+        <Select.Indicator />
+      </Select.IndicatorGroup>
+    </Select.Control>
+    <Portal>
+      <Select.Positioner>
+        <Select.Content>
+          {paramCollection.items.map((item) => (
+            <Select.Item item={item} key={item.value}>
+              {item.label}
+              <Select.ItemIndicator />
+            </Select.Item>
+          ))}
+        </Select.Content>
+      </Select.Positioner>
+    </Portal>
+  </Select.Root>
+);
 
 export default function DataPage({
   trials,
@@ -212,7 +216,7 @@ export default function DataPage({
   batchProgress,
   batchSize,
   setShowDataPage,
-}) { 
+}) {
   const fileInputRef = useRef();
   const [selectedX, setSelectedX] = useState("params.angle");
   const [selectedY, setSelectedY] = useState("results.distance");
@@ -230,8 +234,14 @@ export default function DataPage({
     [trials.length]
   );
 
-  const heatmapData = binTrials(trials, selectedX, selectedY, "results.distance", 12, 12);
-
+  const heatmapData = binTrials(
+    trials,
+    selectedX,
+    selectedY,
+    "results.distance",
+    12,
+    12
+  );
 
   const paginatedTrials = useMemo(
     () => trials.slice((page - 1) * ROWS_PER_PAGE, page * ROWS_PER_PAGE),
@@ -269,41 +279,43 @@ export default function DataPage({
     return () => clearInterval(interval);
   }, [playing, 1, selectedTrial]);
 
-  
-
   return (
     <Container maxW="6xl" py={8}>
       <VStack spacing={18} align="stretch">
         <Heading size="lg">Projectile Motion Data Randomizer</Heading>
-        
+
         <HStack spacing={4} justify="flex-end">
           <Button colorScheme="blue" onClick={() => setShowDataPage(false)}>
             Resume Simulation
           </Button>
-          
+
           <input
             type="file"
             accept=".csv"
             ref={fileInputRef}
             style={{ display: "none" }}
-            onChange={event => handleCSVUpload(event, setTrials)}
+            onChange={(event) => handleCSVUpload(event, setTrials)}
           />
 
           <Button
             colorScheme="purple"
             onClick={runBatchSimulations}
             isLoading={isRunningBatch}
-            loadingText={`Running ${batchSize} trials... (${batchProgress.toFixed(1)}%)`}
+            loadingText={`Running ${batchSize} trials... (${batchProgress.toFixed(
+              1
+            )}%)`}
           >
             Randomize {batchSize} Simulations
           </Button>
         </HStack>
 
         <Box bg="white" p={4} borderRadius="md" boxShadow="md">
-          
-          <Heading size="md" mb={4}>Full Data Table</Heading>
+          <Heading size="md" mb={4}>
+            Full Data Table
+          </Heading>
           <Text fontSize="sm" color="gray.600" mb={4}>
-            Projectile motion data for each trial. Click a row to replay the trial.
+            Projectile motion data for each trial. Click a row to replay the
+            trial.
           </Text>
           <Box spacing={10} align="stretch">
             <HStack spacing={4} mb={4} justify="self-end">
@@ -331,7 +343,6 @@ export default function DataPage({
             </Table.Header>
             <Table.Body>
               {paginatedTrials.map((trial, i) => (
-                
                 <Table.Row
                   key={`${trial.id}-${i}`}
                   onClick={() => {
@@ -363,10 +374,7 @@ export default function DataPage({
           >
             <ButtonGroup variant="ghost" size="sm">
               <Pagination.PrevTrigger asChild>
-                <IconButton
-                  aria-label="Previous page"
-                  isDisabled={page === 1}
-                >
+                <IconButton aria-label="Previous page" isDisabled={page === 1}>
                   <LuChevronLeft />
                 </IconButton>
               </Pagination.PrevTrigger>
@@ -395,14 +403,17 @@ export default function DataPage({
         </Box>
 
         <Box bg="white" p={4} borderRadius="md" boxShadow="md">
-          <Heading size="lg" mb={4}>Custom Comparison</Heading>
+          <Heading size="lg" mb={4}>
+            Custom Comparison
+          </Heading>
           <HStack spacing={4} mb={4}>
             {renderSelect("X-Axis", selectedX, setSelectedX)}
             {renderSelect("Y-Axis", selectedY, setSelectedY)}
           </HStack>
-          <Heading size="md" mb={4}>Parameter Correlation</Heading>
+          <Heading size="md" mb={4}>
+            Parameter Correlation
+          </Heading>
           <ResponsiveContainer width="100%" height={400}>
-            
             <ScatterChart
               key={`scatter-${chartKey}`}
               margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
@@ -410,36 +421,50 @@ export default function DataPage({
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
                 dataKey="x"
-                name={paramCollection.items.find(o => o.value === selectedX)?.label}
+                name={
+                  paramCollection.items.find((o) => o.value === selectedX)
+                    ?.label
+                }
                 type="number"
               />
               <YAxis
                 dataKey="y"
-                name={paramCollection.items.find(o => o.value === selectedY)?.label}
+                name={
+                  paramCollection.items.find((o) => o.value === selectedY)
+                    ?.label
+                }
                 type="number"
               />
               <Tooltip content={<CustomTooltip />} />
-              <Scatter
-                data={chartData}
-                fill="#3182CE"
-                name="Trials"
-              />
+              <Scatter data={chartData} fill="#3182CE" name="Trials" />
             </ScatterChart>
-            
-            
-
           </ResponsiveContainer>
-          <Heading size="md" mb={4}>Parameter Sensitivity Heatmap</Heading>
+          <Heading size="md" mb={4}>
+            Parameter Sensitivity Heatmap
+          </Heading>
           <Text fontSize="sm" color="gray.600" mb={4}>
             Size indicates average distance for each bin or size of z
           </Text>
           <ResponsiveContainer width="100%" height={400}>
-            
             <ScatterChart>
-              <XAxis dataKey="x" name={paramCollection.items.find(o => o.value === selectedX)?.label} type="number" />
-              <YAxis dataKey="y" name={paramCollection.items.find(o => o.value === selectedY)?.label} type="number" />
+              <XAxis
+                dataKey="x"
+                name={
+                  paramCollection.items.find((o) => o.value === selectedX)
+                    ?.label
+                }
+                type="number"
+              />
+              <YAxis
+                dataKey="y"
+                name={
+                  paramCollection.items.find((o) => o.value === selectedY)
+                    ?.label
+                }
+                type="number"
+              />
               <ZAxis dataKey="z" range={[0, 400]} />
-              <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+              <Tooltip cursor={{ strokeDasharray: "3 3" }} />
               <Scatter
                 data={heatmapData}
                 fill="#3182CE"
@@ -453,13 +478,14 @@ export default function DataPage({
         </Box>
 
         <Box bg="white" p={4} borderRadius="md" boxShadow="md">
-          <Heading size="md" mb={4}>Actual vs Theoretical Distance</Heading>
+          <Heading size="md" mb={4}>
+            Actual vs Theoretical Distance
+          </Heading>
           <Text fontSize="sm" color="gray.600" mb={4}>
             Comparison of actual projectile distance with ideal (no air
             resistance) calculation
           </Text>
           <ResponsiveContainer width="100%" height={400}>
-            
             <LineChart
               key={`line-${chartKey}`}
               data={chartData}
@@ -502,8 +528,6 @@ export default function DataPage({
             </LineChart>
           </ResponsiveContainer>
         </Box>
-
-       
 
         <Drawer.Root
           open={drawerOpen}
@@ -588,7 +612,6 @@ export default function DataPage({
                             Reset
                           </Button>
                         </HStack>
-                        
                       </Box>
                     </Box>
                   )}

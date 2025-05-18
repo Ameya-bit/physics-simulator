@@ -34,39 +34,40 @@ export default function App() {
   const batchSize = 10; // Adjust as needed
 
   const runBatchSimulations = async () => {
-  setIsRunningBatch(true);
-  setBatchProgress(0);
+    setIsRunningBatch(true);
+    setBatchProgress(0);
 
-  const newTrials = []; // Initialize as array
-  
-  for (let i = 0; i < batchSize; i++) {
-    const params = {
-      mass: Math.random() * 5 + 0.5,
-      angle: Math.random() * 90,
-      launchVelocity: Math.random() * 50 + 10,
-      drag: Math.random() * 0.5 + 0.1,
-      spin: (Math.random() - 0.5) * 20,
-      gravity: 9.81,
-      airDensity: 1.225,
-    };
+    const newTrials = []; // Initialize as array
 
-    const result = await runHeadlessSimulation(params);
-    newTrials.push({  // Push trial objects into the array
-      params,
-      results: {
-        distance: result.distance || 0,
-        maxHeight: result.maxHeight || 0,
-        airTime: result.airTime || 0,
-        trajectory: result.trajectory || []
-      }
-    });
-    
-    setBatchProgress(((i + 1) / batchSize) * 100);
-  }
+    for (let i = 0; i < batchSize; i++) {
+      const params = {
+        mass: Math.random() * 5 + 0.5,
+        angle: Math.random() * 90,
+        launchVelocity: Math.random() * 50 + 10,
+        drag: Math.random() * 0.5 + 0.1,
+        spin: (Math.random() - 0.5) * 20,
+        gravity: 9.81,
+        airDensity: 1.225,
+      };
 
-  setTrials((prev) => [...prev, ...newTrials]);
-  setIsRunningBatch(false);
-};
+      const result = await runHeadlessSimulation(params);
+      newTrials.push({
+        // Push trial objects into the array
+        params,
+        results: {
+          distance: result.distance || 0,
+          maxHeight: result.maxHeight || 0,
+          airTime: result.airTime || 0,
+          trajectory: result.trajectory || [],
+        },
+      });
+
+      setBatchProgress(((i + 1) / batchSize) * 100);
+    }
+
+    setTrials((prev) => [...prev, ...newTrials]);
+    setIsRunningBatch(false);
+  };
 
   async function runHeadlessSimulation(params) {
     return new Promise((resolve) => {
@@ -94,7 +95,6 @@ export default function App() {
         },
         trajectory: [],
       };
-
 
       const dt = 0.016; // 60fps timestep
       let airTime = 0;
@@ -210,8 +210,8 @@ export default function App() {
       {/* UI Controls */}
       <nav style={{ position: "absolute", top: 20, left: 20, zIndex: 1000 }}>
         <Button colorScheme="blue" onClick={() => setShowDataPage(true)}>
-            Analyze Data
-          </Button>
+          Analyze Data
+        </Button>
       </nav>
 
       {/* Simulation UI */}
@@ -250,8 +250,6 @@ export default function App() {
             overflow: "auto",
           }}
         >
-          
-
           <DataPage
             trials={trials}
             setTrials={setTrials}
