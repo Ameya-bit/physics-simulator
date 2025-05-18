@@ -10,6 +10,9 @@ import {
   createListCollection,
 } from "@chakra-ui/react";
 
+import { Pagination, ButtonGroup, IconButton } from "@chakra-ui/react";
+import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
+
 import {
   LineChart,
   Line,
@@ -39,17 +42,16 @@ function calculateTheoreticalDistance(params) {
 
 function downloadCSV(trials) {
   const header = "Velocity,Angle,Spin,Distance,Max Height,Air Time\n";
-  const rows = trials.map((trial) =>
-    [
-      trial.params.launchVelocity,
-      trial.params.angle,
-      trial.params.spin,
-      trial.results.distance,
-      trial.results.maxHeight,
-      trial.results.airTime,
-    ].join(",")
-  );
-  const csv = header + rows.join("\n");
+  const rows = trials.map((trial) => [
+    trial.params.launchVelocity || 0,
+    trial.params.angle || 0,
+    trial.params.spin || 0,
+    (trial.results?.distance ?? 0).toFixed(2),
+    (trial.results?.maxHeight ?? 0).toFixed(2),
+    (trial.results?.airTime ?? 0).toFixed(2),
+  ]);
+  
+  const csv = header + rows.map(row => row.join(",")).join("\n");
   const blob = new Blob([csv], { type: "text/csv" });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
@@ -68,9 +70,24 @@ const paramCollection = createListCollection({
   ],
 });
 
-export default function DataPage({ trials }) {
+export default function DataPage({
+  trials,
+  runBatchSimulations,
+  isRunningBatch,
+  batchProgress,
+  batchSize,
+}) {
   const [selectedX, setSelectedX] = useState("params.angle");
   const [selectedY, setSelectedY] = useState("results.distance");
+  const ROWS_PER_PAGE = 10;
+  const [page, setPage] = useState(1); // Chakra Pagination is 1-based
+  const totalPages = Math.ceil(trials.length / ROWS_PER_PAGE);
+  console.log(trials);
+
+  const paginatedTrials = trials.slice(
+    (page - 1) * ROWS_PER_PAGE,
+    page * ROWS_PER_PAGE
+  );
 
   const chartData = trials.map((trial, i) => ({
     x: getNestedValue(trial, selectedX),
@@ -90,13 +107,27 @@ export default function DataPage({ trials }) {
     <Container maxW="6xl" py={8}>
       <VStack spacing={8} align="stretch">
         <Heading size="lg">Projectile Trials Data</Heading>
-        <Button
-          colorScheme="blue"
-          alignSelf="flex-end"
-          onClick={() => downloadCSV(trials)}
-        >
-          Download CSV
-        </Button>
+        <HStack spacing={4} mb={4}>
+          <Button
+            colorScheme="blue"
+            alignSelf="flex-end"
+            onClick={() => downloadCSV(trials)}
+          >
+            Download CSV
+          </Button>
+          <Button
+            colorScheme="purple"
+            alignSelf="flex-end"
+            onClick={runBatchSimulations}
+            isLoading={isRunningBatch}
+            loadingText={`Running ${batchSize} trials... (${batchProgress.toFixed(
+              1
+            )}%)`}
+          >
+            Run 10 Simulations
+          </Button>
+        </HStack>
+
         <Box overflowX="auto" w="100%">
           <Table.Root size="sm" variant="outline" striped>
             <Table.Header>
@@ -110,8 +141,8 @@ export default function DataPage({ trials }) {
               </Table.Row>
             </Table.Header>
             <Table.Body>
-              {trials.map((trial, i) => (
-                <Table.Row key={i}>
+              {paginatedTrials.map((trial, i) => (
+                <Table.Row key={i + (page - 1) * ROWS_PER_PAGE}>
                   <Table.Cell>{trial.params.launchVelocity}</Table.Cell>
                   <Table.Cell>{trial.params.angle}</Table.Cell>
                   <Table.Cell>{trial.params.spin}</Table.Cell>
@@ -122,9 +153,39 @@ export default function DataPage({ trials }) {
               ))}
             </Table.Body>
           </Table.Root>
+          <Pagination.Root
+            count={trials.length}
+            pageSize={ROWS_PER_PAGE}
+            page={page}
+            onChange={setPage}
+            mt={4}
+          >
+            <ButtonGroup variant="ghost" size="sm" wrap="wrap">
+              <Pagination.PrevTrigger asChild>
+                <IconButton aria-label="Previous page">
+                  <LuChevronLeft />
+                </IconButton>
+              </Pagination.PrevTrigger>
+              <Pagination.Items
+                render={(pageNum) => (
+                  <IconButton
+                    key={pageNum.value}
+                    variant={{ base: "ghost", _selected: "outline" }}
+                    isActive={pageNum.value === page}
+                    onClick={() => setPage(pageNum.value)}
+                  >
+                    {pageNum.value}
+                  </IconButton>
+                )}
+              />
+              <Pagination.NextTrigger asChild>
+                <IconButton aria-label="Next page">
+                  <LuChevronRight />
+                </IconButton>
+              </Pagination.NextTrigger>
+            </ButtonGroup>
+          </Pagination.Root>
         </Box>
-
-        
 
         {/* Scatter Chart */}
         <Box
