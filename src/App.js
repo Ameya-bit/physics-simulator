@@ -209,7 +209,9 @@ export default function App() {
 
       {/* UI Controls */}
       <nav style={{ position: "absolute", top: 20, left: 20, zIndex: 1000 }}>
-        <button onClick={() => setShowDataPage(true)}>Data Analysis</button>
+        <Button colorScheme="blue" onClick={() => setShowDataPage(true)}>
+            Analyze Data
+          </Button>
       </nav>
 
       {/* Simulation UI */}
@@ -248,23 +250,16 @@ export default function App() {
             overflow: "auto",
           }}
         >
-          <nav
-            style={{ position: "absolute", top: 20, left: 20, zIndex: 1000 }}
-          >
-            <button
-              onClick={() => setShowDataPage(false)}
-              style={{ marginRight: 10 }}
-            >
-              Simulation
-            </button>
-          </nav>
+          
 
           <DataPage
             trials={trials}
+            setTrials={setTrials}
             runBatchSimulations={runBatchSimulations}
             isRunningBatch={isRunningBatch}
             batchSize={batchSize}
             batchProgress={batchProgress}
+            setShowDataPage={setShowDataPage}
           />
         </div>
       )}

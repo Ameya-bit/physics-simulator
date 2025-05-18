@@ -161,3 +161,5 @@ export default function PhysicsScene({ boxRef, setVelocity, setPosition, params,
     </Canvas>
   )
 }
+
+export {DistanceMarkers, CameraController}
