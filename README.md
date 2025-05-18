@@ -1,70 +1,77 @@
-# Getting Started with Create React App
+# Projectile Motion Simulator & Data Explorer
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Overview
 
-## Available Scripts
+This web application lets you simulate, visualize, and analyze projectile motion with customizable physics parameters. Run single or batch simulations, explore the effects of angle, velocity, spin, drag, and more, and gain insights through interactive charts and a 3D replay viewer.
 
-In the project directory, you can run:
+## Features
 
-### `npm start`
+- **Interactive Simulator:** Launch projectiles with custom settings and see real-time 3D motion.
+- **Batch Simulation:** Generate hundreds of random trials to explore parameter effects statistically.
+- **Data Table:** View all simulation results in a sortable, paginated table.
+- **Replay Viewer:** Click any trial to watch its 3D trajectory replay in an immersive overlay.
+- **Parameter Sensitivity Heatmap:** Visualize how combinations of angle and velocity affect outcomes.
+- **Customizable Charts:** Analyze correlations and trends with scatter plots, line charts, and histograms.
+- **CSV Export/Import:** Download your data or upload your own trials for analysis.
+- **Tooltips & Help:** Hover for quick explanations of controls and data.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## How to Use
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+1. **Run Simulations:**  
+   - Use the “Free Simulation” button to launch a single trial with custom parameters.
+   - Or run a batch of randomized trials for statistical exploration.
 
-### `npm test`
+2. **Explore Data:**  
+   - The table shows all trials. Hover for tooltips; click a row to open the replay viewer.
+   - Use the charts to see how parameters affect distance, height, and air time.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+3. **Replay & Analyze:**  
+   - In the replay overlay, scrub through the flight, pause/play, and adjust playback speed.
 
-### `npm run build`
+4. **Import/Export:**  
+   - Download your results as CSV.
+   - Upload a CSV to analyze your own or shared data (trajectory data supported).
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Installation
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+1. Clone the repository:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```
+git clone https://github.com/your-username/projectile-simulator.git
+cd projectile-simulator
+```
+2. Install Dependencies:
 
-### `npm run eject`
+```
+npm install
+```
+3. Start the app:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```
+npm start
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Tech Stack
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+- **React** (Vite/CRA)
+- **Chakra UI v3+** (composable components)
+- **Recharts** (data visualization)
+- **@react-three/fiber** (3D simulation)
+- **PapaParse** (CSV parsing)
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## CSV Format
 
-## Learn More
+| Velocity | Angle | Spin | Distance | Max Height | Air Time | Trajectory |
+|----------|-------|------|----------|------------|----------|------------|
+| number   | number|number| number   | number     | number   | JSON array |
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Trajectory is a JSON array of `{x, y, z}` points.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## License
 
-### Code Splitting
+MIT
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
 
-### Analyzing the Bundle Size
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
 
-### Making a Progressive Web App
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
