@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.js": "/physics-simulator/static/js/main.36c8825f.js",
+    "main.js": "/physics-simulator/static/js/main.a40e4131.js",
     "index.html": "/physics-simulator/index.html",
-    "main.36c8825f.js.map": "/physics-simulator/static/js/main.36c8825f.js.map"
+    "main.a40e4131.js.map": "/physics-simulator/static/js/main.a40e4131.js.map"
   },
   "entrypoints": [
-    "static/js/main.36c8825f.js"
+    "static/js/main.a40e4131.js"
   ]
 }
