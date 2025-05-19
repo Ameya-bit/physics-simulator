@@ -276,7 +276,7 @@ export default function App() {
             style={{
               position: "absolute",
               bottom: 24,
-              left: 24,
+              right: 24,
               background: "rgba(255,255,255,0.85)",
               borderRadius: "8px",
               padding: "10px 16px",
@@ -286,6 +286,12 @@ export default function App() {
               pointerEvents: "none",
             }}
           >
+            <div
+              style={{ display: "flex", alignItems: "center", marginBottom: 4 }}
+            >
+              
+              Force Arrow Legend
+            </div>
             <div
               style={{ display: "flex", alignItems: "center", marginBottom: 4 }}
             >
