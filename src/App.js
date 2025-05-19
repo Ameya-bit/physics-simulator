@@ -31,6 +31,15 @@ export default function App() {
 
   const [isRunningBatch, setIsRunningBatch] = useState(false);
   const [batchProgress, setBatchProgress] = useState(0);
+  const [trajectory, setTrajectory] = useState([]);
+  const [trajectoryColor, setTrajectoryColor] = useState("#888");
+  const [oldTrajectories, setOldTrajectories] = useState([]); // Array of { points, color }
+  const [currentTrajectory, setCurrentTrajectory] = useState({
+    points: [],
+    color: getRandomColor(),
+  });
+  const [showTrajectories, setShowTrajectories] = useState(true);
+
   const batchSize = 10; // Adjust as needed
 
   const runBatchSimulations = async () => {
@@ -150,6 +159,11 @@ export default function App() {
         maxHeight.current = position.y;
       }
       if (position.y < 0.5 && maxHeight.current > 1) {
+        console.log(trajectory);
+        setOldTrajectories((prev) => [
+          ...prev,
+          { points: trajectory, color: trajectoryColor },
+        ]);
         setInFlight(false);
         const airTime = (Date.now() - startTime.current) / 1000;
         const newTrial = {
@@ -165,22 +179,38 @@ export default function App() {
     }
   }, [position, inFlight, activeParams, trials]);
 
+  function getRandomColor() {
+    // Hue: any, Saturation: 70-100%, Lightness: 35-50% (avoids pastels/white)
+    const hue = Math.floor(Math.random() * 360);
+    const saturation = Math.floor(Math.random() * 30) + 70; // 70-100%
+    const lightness = Math.floor(Math.random() * 15) + 35;  // 35-50%
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+  }
+
   const reset = (params) => {
     boxRef.current.resetForces(true);
     boxRef.current.resetTorques(true);
     boxRef.current.setTranslation({ x: 0, y: 6, z: 0 }, true); // Initial height = 5 units
     boxRef.current.setLinvel({ x: 0, y: 0, z: 0 }, true);
-    boxRef.current.setAngvel({ x: 0, y: 0, z: params.spin }, true);
+    boxRef.current.setAngvel({ x: 0, y: 0, z: 0 }, true);
+    boxRef.current.setRotation({ x: 0, y: 0, z: 0, w: 1 }, true);
+    setOldTrajectories((prev) => [
+          ...prev,
+          { points: trajectory, color: trajectoryColor },
+        ]);
   };
 
   const launchProjectile = (params) => {
     if (boxRef.current) {
+      setTrajectoryColor(getRandomColor());
+
       // 1. Full physics reset
       boxRef.current.resetForces(true);
       boxRef.current.resetTorques(true);
       boxRef.current.setTranslation({ x: 0, y: 6, z: 0 }, true); // Initial height = 5 units
       boxRef.current.setLinvel({ x: 0, y: 0, z: 0 }, true);
       boxRef.current.setAngvel({ x: 0, y: 0, z: params.spin }, true);
+      boxRef.current.setRotation({ x: 0, y: 0, z: 0, w: 1 }, true);
 
       // 2. Apply initial velocity
       const angleRad = params.angle * (Math.PI / 180);
@@ -193,11 +223,12 @@ export default function App() {
       startTime.current = Date.now();
       setInFlight(true);
       setActiveParams(params);
+      setTrajectory([]); // Reset trajectory
     }
   };
 
   return (
-    <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
+    <div style={{ width: "100vw", height: "100vh", position: "relative"}}>
       {/* PhysicsScene contains Canvas and Physics */}
       <PhysicsScene
         boxRef={boxRef}
@@ -205,13 +236,23 @@ export default function App() {
         setPosition={setPosition}
         params={activeParams}
         setShowDataPage={showDataPage}
+        trajectory={trajectory}
+        setTrajectory={setTrajectory}
+        trajectoryColor={trajectoryColor}
+        oldTrajectories={oldTrajectories}
+        showTrajectories={showTrajectories}
       />
 
       {/* UI Controls */}
-      <nav style={{ position: "absolute", top: 20, left: 20, zIndex: 1000 }}>
-        <Button colorScheme="blue" onClick={() => setShowDataPage(true)}>
+      <nav style={{ position: "absolute", top: 20, left: 20, zIndex: 1000 }} >
+        <Button
+          colorScheme="blue"
+          onClick={() => setShowDataPage(true)}
+          borderRadius="md"
+        >
           Analyze Data
         </Button>
+        
       </nav>
 
       {/* Simulation UI */}
@@ -222,17 +263,73 @@ export default function App() {
             position={position}
             mass={activeParams.mass}
           />
-          <EnergyBar
-            velocity={velocity}
-            position={position}
-            mass={activeParams.mass}
-          />
+          
           <UIControls
             activeParams={activeParams}
             setActiveParams={setActiveParams}
             onLaunch={launchProjectile}
             reset={reset}
+            setShowTrajectories={setShowTrajectories}
+            showTrajectories={showTrajectories}
           />
+          <div
+            style={{
+              position: "absolute",
+              bottom: 24,
+              left: 24,
+              background: "rgba(255,255,255,0.85)",
+              borderRadius: "8px",
+              padding: "10px 16px",
+              fontSize: "14px",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
+              zIndex: 2000,
+              pointerEvents: "none",
+            }}
+          >
+            <div
+              style={{ display: "flex", alignItems: "center", marginBottom: 4 }}
+            >
+              <span
+                style={{
+                  display: "inline-block",
+                  width: 18,
+                  height: 6,
+                  background: "#ff0000",
+                  borderRadius: 2,
+                  marginRight: 8,
+                }}
+              />
+              Drag Force
+            </div>
+            <div
+              style={{ display: "flex", alignItems: "center", marginBottom: 4 }}
+            >
+              <span
+                style={{
+                  display: "inline-block",
+                  width: 18,
+                  height: 6,
+                  background: "#0000ff",
+                  borderRadius: 2,
+                  marginRight: 8,
+                }}
+              />
+              Magnus Force
+            </div>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <span
+                style={{
+                  display: "inline-block",
+                  width: 18,
+                  height: 6,
+                  background: "#00ff00",
+                  borderRadius: 2,
+                  marginRight: 8,
+                }}
+              />
+              Gravity
+            </div>
+          </div>
         </>
       )}
 

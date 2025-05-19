@@ -280,12 +280,14 @@ export default function DataPage({
   }, [playing, 1, selectedTrial]);
 
   return (
-    <Container maxW="6xl" py={8}>
-      <VStack spacing={18} align="stretch">
+    <Box bg="#c7d2fe" minH="100vh" w="100vw">
+    <Container maxW="6xl" py={8} >
+      <VStack spacing={18} align="stretch" >
+        <HStack spacing={4} justify="space-between">
         <Heading size="lg">Projectile Motion Data Randomizer</Heading>
 
         <HStack spacing={4} justify="flex-end">
-          <Button colorScheme="blue" onClick={() => setShowDataPage(false)}>
+          <Button colorScheme="blue" onClick={() => setShowDataPage(false)} borderRadius="md" bg="#2C6E49">
             Resume Simulation
           </Button>
 
@@ -304,33 +306,44 @@ export default function DataPage({
             loadingText={`Running ${batchSize} trials... (${batchProgress.toFixed(
               1
             )}%)`}
+            borderRadius="md"
           >
             Randomize {batchSize} Simulations
           </Button>
         </HStack>
+        </HStack>
 
-        <Box bg="white" p={4} borderRadius="md" boxShadow="md">
-          <Heading size="md" mb={4}>
-            Full Data Table
-          </Heading>
+        <Box py={4}></Box>
+
+        {/* Table Box */}
+        <Box bg="white" p={6} py={8} borderRadius={25} boxShadow="md">
+          <HStack spacing={4} mb={4} justify="space-between">
+            <Heading size="lg" mb={4} >
+              Full Data Table
+            </Heading>
+            <Box spacing={10} justify="flex-end">
+              <HStack spacing={4} mb={4}>
+                <Button colorScheme="blue" onClick={() => downloadCSV(trials)} borderRadius="md"  >
+                  Download CSV
+                </Button>
+                <Button
+                  colorScheme="teal"
+                  onClick={() => fileInputRef.current.click()}
+                  borderRadius="md"
+                >
+                  Upload CSV
+                </Button>
+              </HStack>
+            </Box>
+          </HStack>
+
           <Text fontSize="sm" color="gray.600" mb={4}>
             Projectile motion data for each trial. Click a row to replay the
             trial.
           </Text>
-          <Box spacing={10} align="stretch">
-            <HStack spacing={4} mb={4} justify="self-end">
-              <Button colorScheme="blue" onClick={() => downloadCSV(trials)}>
-                Download CSV
-              </Button>
-              <Button
-                colorScheme="teal"
-                onClick={() => fileInputRef.current.click()}
-              >
-                Upload CSV
-              </Button>
-            </HStack>
-          </Box>
-          <Table.Root size="sm" variant="outline" striped>
+          <br></br>
+
+          <Table.Root size="sm" variant="outline" striped >
             <Table.Header>
               <Table.Row>
                 <Table.ColumnHeader>Velocity</Table.ColumnHeader>
@@ -345,14 +358,9 @@ export default function DataPage({
               {paginatedTrials.map((trial, i) => (
                 <Table.Row
                   key={`${trial.id}-${i}`}
-                  onClick={() => {
-                    setSelectedTrial(trial);
-                    setCurrentFrame(0);
-                    setPlaying(true);
-                    setDrawerOpen(true);
-                  }}
+                  
                   cursor="pointer"
-                  _hover={{ bg: "gray.50" }}
+                  _hover={{ bg: "gray.100" }}
                 >
                   <Table.Cell>{trial.params.launchVelocity}</Table.Cell>
                   <Table.Cell>{trial.params.angle}</Table.Cell>
@@ -402,11 +410,14 @@ export default function DataPage({
           </Pagination.Root>
         </Box>
 
-        <Box bg="white" p={4} borderRadius="md" boxShadow="md">
+        <Box py={4}></Box>
+
+        {/* Custom Graph Box */}
+        <Box bg="white" p={6} py={8} borderRadius={25} boxShadow="md">
           <Heading size="lg" mb={4}>
-            Custom Comparison
+            Custom Comparisons
           </Heading>
-          <HStack spacing={4} mb={4}>
+          <HStack spacing={4} mb={4}  p={4}>
             {renderSelect("X-Axis", selectedX, setSelectedX)}
             {renderSelect("Y-Axis", selectedY, setSelectedY)}
           </HStack>
@@ -477,7 +488,10 @@ export default function DataPage({
           </ResponsiveContainer>
         </Box>
 
-        <Box bg="white" p={4} borderRadius="md" boxShadow="md">
+        <Box py={4}></Box>
+
+        {/* Actual vs Theoretical Distance Box */}
+        <Box bg="white" p={6} py={8} borderRadius={25} boxShadow="md">
           <Heading size="md" mb={4}>
             Actual vs Theoretical Distance
           </Heading>
@@ -573,10 +587,8 @@ export default function DataPage({
                         {/* Replayed Projectile */}
                         <mesh
                           position={[
-                            selectedTrial.results.trajectory[currentFrame]?.x ||
-                              0,
-                            selectedTrial.results.trajectory[currentFrame]?.y ||
-                              0,
+                            selectedTrial?.results?.trajectory?.[currentFrame]?.x || 0,
+                            selectedTrial?.results?.trajectory?.[currentFrame]?.y || 0,
                             0,
                           ]}
                         >
@@ -584,17 +596,12 @@ export default function DataPage({
                           <meshStandardMaterial color="#2f74c0" />
                         </mesh>
 
-                        {/* Camera Controls */}
                         <CameraController
                           boxRef={{
                             current: {
                               translation: () => ({
-                                x:
-                                  selectedTrial.results.trajectory[currentFrame]
-                                    ?.x || 0,
-                                y:
-                                  selectedTrial.results.trajectory[currentFrame]
-                                    ?.y || 0,
+                                x: selectedTrial?.results?.trajectory?.[currentFrame]?.x || 0,
+                                y: selectedTrial?.results?.trajectory?.[currentFrame]?.y || 0,
                                 z: 0,
                               }),
                             },
@@ -622,5 +629,6 @@ export default function DataPage({
         </Drawer.Root>
       </VStack>
     </Container>
+    </Box>
   );
 }

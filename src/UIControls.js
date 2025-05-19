@@ -13,16 +13,23 @@ export default function UIControls({
   setActiveParams,
   onLaunch,
   reset,
+  setShowTrajectories,
+  showTrajectories
 }) {
   return (
-    <div style={{ position: "absolute", bottom: 20, left: 20, zIndex: 1000 }}>
-      <VStack
-        align="start"
-        spacing={4}
-        bg="whiteAlpha.800"
-        p={4}
-        borderRadius="md"
-      >
+    <div
+      style={{
+        position: "fixed",
+        bottom: 20,
+        right: 20,
+        background: "rgba(255,255,255, 0.95)",
+        padding: "20px",
+        borderRadius: 25,
+        minWidth: 270,
+        zIndex: 1000,
+      }}
+    >
+      <VStack align="start" spacing={4}>
         {/* Velocity Control */}
         <div>
           <Text mb={2}>Velocity: {activeParams.launchVelocity} m/s</Text>
@@ -36,7 +43,7 @@ export default function UIControls({
                 launchVelocity: val.value.length > 0 ? val.value[0] : 0,
               }))
             }
-            width="200px"
+            width="230px"
           >
             <Slider.Control>
               <Slider.Track>
@@ -60,7 +67,7 @@ export default function UIControls({
                 angle: val.value.length > 0 ? val.value[0] : 0,
               }))
             }
-            width="200px"
+            width="230px"
           >
             <Slider.Control>
               <Slider.Track>
@@ -83,13 +90,11 @@ export default function UIControls({
             max={100}
             step={0.1}
           >
-            <HStack>
               <NumberInput.Control>
                 <NumberInput.Input width="80px" />
               </NumberInput.Control>
               <NumberInput.IncrementTrigger />
               <NumberInput.DecrementTrigger />
-            </HStack>
           </NumberInput.Root>
         </div>
 
@@ -106,7 +111,8 @@ export default function UIControls({
                 drag: val.value.length > 0 ? val.value[0] : 0,
               }))
             }
-            width="200px"
+            step={0.01}
+            width="230px"
           >
             <Slider.Control>
               <Slider.Track>
@@ -130,7 +136,8 @@ export default function UIControls({
                 airDensity: val.value.length > 0 ? val.value[0] : 0,
               }))
             }
-            width="200px"
+            width="230px"
+            step={0.01}
           >
             <Slider.Control>
               <Slider.Track>
@@ -154,7 +161,8 @@ export default function UIControls({
                 gravity: val.value.length > 0 ? val.value[0] : 0,
               }))
             }
-            width="200px"
+            width="230px"
+            step={0.01}
           >
             <Slider.Control>
               <Slider.Track>
@@ -179,7 +187,7 @@ export default function UIControls({
                 restitution: val.value.length > 0 ? val.value[0] : 0,
               }))
             }
-            width="200px"
+            width="230px"
           >
             <Slider.Control>
               <Slider.Track>
@@ -194,8 +202,8 @@ export default function UIControls({
         <div>
           <Text mb={2}>Spin: {activeParams.spin} Rad/s</Text>
           <Slider.Root
-            min={-20}
-            max={20}
+            min={-50}
+            max={50}
             step={0.01}
             value={[activeParams.spin]}
             onValueChange={(val) =>
@@ -204,7 +212,7 @@ export default function UIControls({
                 spin: val.value.length > 0 ? val.value[0] : 0,
               }))
             }
-            width="200px"
+            width="230px"
           >
             <Slider.Control>
               <Slider.Track>
@@ -215,10 +223,14 @@ export default function UIControls({
           </Slider.Root>
         </div>
 
+        
+        
         <Button
           onClick={() => onLaunch(activeParams)}
           colorScheme="blue"
           width="100%"
+          borderRadius="md"
+          marginTop={4}
         >
           Apply & Launch
         </Button>
@@ -226,9 +238,20 @@ export default function UIControls({
           onClick={() => reset(activeParams)}
           colorScheme="blue"
           width="100%"
+          borderRadius="md"
         >
           Reset
         </Button>
+        <Button
+          colorScheme="blue"
+          onClick={() => setShowTrajectories(!showTrajectories)}
+          width="100%"
+          borderRadius="md"
+          bg="#96031A"
+        >
+          Show Trajectories
+        </Button>
+    
       </VStack>
     </div>
   );
